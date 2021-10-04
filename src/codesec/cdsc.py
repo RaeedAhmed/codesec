@@ -2,19 +2,16 @@ import argparse
 import os
 from collections import namedtuple
 from configparser import ConfigParser
+from pathlib import Path
 
 import pyperclip
 
-# +--------------------------╔====================╗--------------------------+ #
+# +--------------------------╔════════════════════╗--------------------------+ #
 # |::::::::::::::::::::::::::║ Exception Handling ║::::::::::::::::::::::::::| #
-# +--------------------------╚====================╝--------------------------+ #
+# +--------------------------╚════════════════════╝--------------------------+ #
 
 
-class Error(Exception):
-    pass
-
-
-class InvalidConfig(Error):
+class InvalidConfig(Exception):
     pass
 
 
@@ -22,9 +19,9 @@ class FileDoesNotExist(InvalidConfig):
     pass
 
 
-# +----------------------------╔===============╗-----------------------------+ #
+# +----------------------------╔═══════════════╗-----------------------------+ #
 # |::::::::::::::::::::::::::::║ Configuration ║:::::::::::::::::::::::::::::| #
-# +----------------------------╚===============╝-----------------------------+ #
+# +----------------------------╚═══════════════╝-----------------------------+ #
 
 cpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.ini")
 
@@ -48,9 +45,9 @@ def reset():
     print("Reset config")
 
 
-# +----------------------------╔=================╗---------------------------+ #
+# +----------------------------╔═════════════════╗---------------------------+ #
 # |::::::::::::::::::::::::::::║ Pretty Printing ║:::::::::::::::::::::::::::| #
-# +----------------------------╚=================╝---------------------------+ #
+# +----------------------------╚═════════════════╝---------------------------+ #
 
 
 def repeat(fill: str, limit: int) -> str:
@@ -114,12 +111,12 @@ def format(title: str) -> str:
     return f"{l1}\n{l2}\n{l3}"
 
 
-# +----------------------------╔===============╗-----------------------------+ #
+# +----------------------------╔═══════════════╗-----------------------------+ #
 # |::::::::::::::::::::::::::::║ Program Modes ║:::::::::::::::::::::::::::::| #
-# +----------------------------╚===============╝-----------------------------+ #
+# +----------------------------╚═══════════════╝-----------------------------+ #
 
 
-def copy(title: str) -> str:
+def copy(title: str) -> None:
     section = format(title)
     pyperclip.copy(section)
     print("Copied:\n" + section)
@@ -154,43 +151,92 @@ def set_param(setting: str) -> None:
             print(f"\n{e}\nTry again: ")
 
 
-# +-----------------------------╔==============╗-----------------------------+ #
-# |:::::::::::::::::::::::::::::║ Command Line ║:::::::::::::::::::::::::::::| #
-# +-----------------------------╚==============╝-----------------------------+ #
+# +----------------------------╔════════════════╗----------------------------+ #
+# |::::::::::::::::::::::::::::║ Parse and Edit ║::::::::::::::::::::::::::::| #
+# +----------------------------╚════════════════╝----------------------------+ #
 
 
-def cli():
+def walk(queries: list[str]) -> None:
+    to_walk: list[Path] = [Path(query) for query in queries if Path(query).exists()]
+    paths: list[Path] = []
+    for path in to_walk:
+        if path.is_dir():
+            paths.extend(list(path.rglob("*")))
+        if path.is_file():
+            paths.append(path)
+    to_parse: set[Path] = {path for path in paths if path.is_file()}
+    print(len(to_parse), "files found", sep=" ")
+    for path in to_parse:
+        if path.read_text():
+            parse(path)
+
+
+def parse(path: Path) -> None:
+    config = load_config()["USER"]
+    delimiter = config.get("delimiter").strip('"')
+    if not delimiter.endswith(" "):
+        delimiter += " "
+    with open(path, "r") as file:
+        lines = file.readlines()
+        newlines = []
+        for line in lines:
+            if line.startswith(delimiter):
+                line = line.rstrip()
+                title = " ".join(line.split(" ")[2:])
+                line = format(title) + "\n"
+            newlines.append(line)
+    if lines != newlines:
+        print(f"Editing {str(path)}")
+        with open(path, "w") as file:
+            file.writelines(newlines)
+
+
+# +------------------------╔════════════════════════╗------------------------+ #
+# |::::::::::::::::::::::::║ Command Line Interface ║::::::::::::::::::::::::| #
+# +------------------------╚════════════════════════╝------------------------+ #
+
+
+def cli() -> argparse.ArgumentParser:
     config = load_config()
     parser = argparse.ArgumentParser(
         description="Create pretty printed section title for your code"
     )
     parser.add_argument(
+        "paths", nargs="*", help="recursively edit files with code sections using delimiter"
+    )
+    actions = parser.add_mutually_exclusive_group()
+    actions.add_argument(
+        "--symbols", action="store_true", help="prints out common ascii symbols for decoration"
+    )
+    actions.add_argument(
         "-s",
         "--set",
         choices=config.defaults().keys(),
         metavar="",
         help=f"configure settings: {', '.join(config.defaults().keys())}",
     )
-    parser.add_argument(
-        "--symbols", action="store_true", help="prints out common ascii symbols for decoration"
-    )
-    parser.add_argument("--reset", action="store_true", help="reset config")
-    parser.add_argument(
-        "title", type=str, default="Section Title", nargs="?", help="title of your section"
-    )
-    return parser.parse_args()
+    actions.add_argument("--reset", action="store_true", help="reset config")
+    actions.add_argument("-t", "--title", type=str, nargs="+", help="title of your section")
+    return parser
 
 
 def main():
-    args = cli()
-    if args.symbols:
+    parser = cli()
+    args = parser.parse_args()
+    if args.paths:
+        walk(args.paths)
+    elif args.symbols:
         print_symbols()
     elif args.reset:
         reset()
     elif setting := args.set:
         set_param(setting)
+    elif args.title:
+        title = " ".join(args.title)
+        copy(title)
     else:
-        copy(args.title)
+        parser.print_help()
+        print("Preview of current settings", format("Section Title"), sep="\n")
 
 
 if __name__ == "__main__":
