@@ -1,2 +1,2 @@
-"""Generates code headers for your python/web scripts"""
-__version__ = "0.1"
+"""Generates code headers for your text files"""
+__version__ = "0.2.0"
