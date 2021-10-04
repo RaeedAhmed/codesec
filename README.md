@@ -32,6 +32,62 @@ optional arguments:
 ### Example:
 
 ```bash
+$ codesec --set delimiter
+Default delimiter: "# h "
+Current delimiter: "# h "
+Enter setting: "# !h "
+$ codesec src tests example.py
+Found 4 files
+Editing src/app.py
+Editing src/utils.py
+Editing tests/test_func.py
+Editing example.py
+```
+Before:
+```python
+# app.py
+
+# !h Boring Functions
+
+def bar():
+    pass
+
+# !h Cool Functions
+
+def foo():
+    print("Somthing cool")
+
+def main():
+    foo()
+
+```
+
+After:
+
+```python
+# app.py
+
+# +------------╔══════════════════╗------------+ #
+# |::::::::::::║ Boring Functions ║::::::::::::| #
+# +------------╚══════════════════╝------------+ #
+
+def bar():
+    pass
+
+# +-------------╔════════════════╗-------------+ #
+# |:::::::::::::║ Cool Functions ║:::::::::::::| #
+# +-------------╚════════════════╝-------------+ #
+
+def foo():
+    print("Somthing cool")
+
+def main():
+    foo()
+
+```
+
+Generate and copy individual sections
+```bash
 $ codesec --set length
 
 Default length: 80
@@ -52,7 +108,7 @@ Preview:
 # |::::::::::::::► Section Title ◄:::::::::::::| #
 # +--------------╚≡+≡+≡+≡+≡+≡+≡+≡╝-------------+ #
 
-$ codesec "My Section"
+$ codesec -t "My Section"
 
 Copied:
 # +---------------╔≡+≡+≡+≡+≡+≡+╗---------------+ #
