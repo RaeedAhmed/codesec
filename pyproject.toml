@@ -15,7 +15,7 @@ dependencies = [
 
 [project.urls]
 Home = "https://github.com/RaeedAhmed/codesec"
-Changelog = "https://github.com/RaeedAhmed/codesec/blob/main/CHANGELOG.md
+Changelog = "https://github.com/RaeedAhmed/codesec/blob/main/CHANGELOG.md"
 
 [project.scripts]
 codesec = "codesec.cdsc:main"
