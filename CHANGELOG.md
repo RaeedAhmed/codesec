@@ -1,7 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file
 
-## [0.1.2] - 2021-10-04
+## [0.2.1] - 2021-10-04
+### Added
+- Version argument
+
+### Fixed
+- Wrong Changelog version number
+
+## [0.2.0] - 2021-10-04
 ### Added
 - Insert code sections to text files with recursive glob
     - Delimiter setting used to mark section insertion

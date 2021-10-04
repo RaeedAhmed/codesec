@@ -6,6 +6,8 @@ from pathlib import Path
 
 import pyperclip
 
+import codesec
+
 # +--------------------------╔════════════════════╗--------------------------+ #
 # |::::::::::::::::::::::::::║ Exception Handling ║::::::::::::::::::::::::::| #
 # +--------------------------╚════════════════════╝--------------------------+ #
@@ -215,6 +217,7 @@ def cli() -> argparse.ArgumentParser:
         metavar="",
         help=f"configure settings: {', '.join(config.defaults().keys())}",
     )
+    actions.add_argument("--version", action="version", version=f"codesec v{codesec.__version__}")
     actions.add_argument("--reset", action="store_true", help="reset config")
     actions.add_argument("-t", "--title", type=str, nargs="+", help="title of your section")
     return parser
