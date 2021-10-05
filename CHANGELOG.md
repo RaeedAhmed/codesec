@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file
 
+## [0.2.2] - 2021-10-05
+### Fixed
+- Handle non text files
+
+
 ## [0.2.1] - 2021-10-04
 ### Added
 - Version argument

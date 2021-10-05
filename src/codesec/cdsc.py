@@ -169,8 +169,11 @@ def walk(queries: list[str]) -> None:
     to_parse: set[Path] = {path for path in paths if path.is_file()}
     print(len(to_parse), "files found", sep=" ")
     for path in to_parse:
-        if path.read_text():
-            parse(path)
+        try:
+            if path.read_text():
+                parse(path)
+        except UnicodeError:
+            pass
 
 
 def parse(path: Path) -> None:
