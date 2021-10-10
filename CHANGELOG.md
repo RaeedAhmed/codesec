@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file
 
+## [0.2.4] - 2021-10-10
+### Fixed
+- Incorrect comment format
+
 ## [0.2.3] - 2021-10-10
 ### Added
 - User can input comment style
