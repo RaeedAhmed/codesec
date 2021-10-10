@@ -79,7 +79,7 @@ def format(title: str) -> str:
     if not center_fill:
         center_fill = " "
     try:
-        comm = config.getboolean("comment") * "# "
+        comm = config.get("comment") + " "
     except ValueError as e:
         raise InvalidConfig(e)
     tlen = len(title)
